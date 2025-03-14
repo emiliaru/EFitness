@@ -1,0 +1,169 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  profile       Profile?
+  healthSurvey  HealthSurvey?
+  workoutPlan   WorkoutPlan?
+  nutritionPlan NutritionPlan?
+  workoutLogs   WorkoutLog[]
+  bodyMeasurements BodyMeasurement[]
+  calorieIntake CalorieIntake[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  age       Int
+  gender    String
+  weight    Float
+  targetWeight Float
+  height    Float
+  goal      String   // e.g., "weight_loss", "muscle_gain", "maintenance"
+  activityLevel String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HealthSurvey {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  pastIllnesses String  @db.Text    // Stored as JSON string
+  vitaminDeficiencies String  @db.Text    // Stored as JSON string
+  allergies    String  @db.Text    // Stored as JSON string
+  medications  String  @db.Text    // Stored as JSON string
+  exerciseEquipment String @db.Text    // Stored as JSON string
+  exerciseSpace String
+  exerciseLocation String
+  injuries     String  @db.Text    // Stored as JSON string
+  dietPreference String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WorkoutPlan {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  exercises Exercise[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Exercise {
+  id           String     @id @default(cuid())
+  workoutPlanId String
+  workoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id])
+  name         String
+  sets         Int
+  reps         Int
+  description  String     @db.Text
+  imageUrl     String?
+  dayOfWeek    Int        // 1-7 representing days of the week
+  workoutLogs  WorkoutLogEntry[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model NutritionPlan {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  meals     Meal[]
+  calories  Int
+  protein   Int
+  carbs     Int
+  fats      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Meal {
+  id              String   @id @default(cuid())
+  nutritionPlanId String
+  nutritionPlan   NutritionPlan @relation(fields: [nutritionPlanId], references: [id])
+  name            String
+  foods           String  @db.Text    // Stored as JSON string
+  mealTime        String       // e.g., "breakfast", "lunch", "dinner", "snack"
+  day             String       // e.g., "Poniedziałek", "Wtorek", etc.
+  calories        Int
+  protein         Float
+  carbs           Float
+  fats            Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Nowe modele dla śledzenia postępów
+
+model WorkoutLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime
+  notes     String?  @db.Text
+  exercises WorkoutLogEntry[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkoutLogEntry {
+  id          String    @id @default(cuid())
+  workoutLogId String
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id])
+  exerciseId   String
+  exercise     Exercise  @relation(fields: [exerciseId], references: [id])
+  sets         Int
+  reps         Int
+  weight       Float?    // Opcjonalne, dla ćwiczeń z obciążeniem
+  duration     Int?      // Opcjonalne, dla ćwiczeń kardio (w sekundach)
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model BodyMeasurement {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime
+  weight    Float
+  bodyFat   Float?
+  chest     Float?
+  waist     Float?
+  hips      Float?
+  arms      Float?
+  thighs    Float?
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CalorieIntake {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      DateTime
+  calories  Int
+  protein   Float
+  carbs     Float
+  fats      Float
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
