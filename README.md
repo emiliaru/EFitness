@@ -1,5 +1,7 @@
 EFitness - Twój Osobisty Trener Online
+
 O Aplikacji
+
 EFitness to kompleksowa aplikacja webowa stworzona z myślą o osobach, które chcą zadbać o swoje zdrowie i kondycję fizyczną. Aplikacja oferuje spersonalizowane plany treningowe, monitorowanie postępów oraz szczegółowe zalecenia dotyczące diety i suplementacji.
 
 Główne Funkcje
